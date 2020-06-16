@@ -1,0 +1,177 @@
+<html>
+<head>
+    <script src="https://unpkg.com/vue"></script>
+</head>
+<body>
+<div id="app">
+    <div v-if="!haveTree">
+        <h3>Root Value:</h3>
+        <input type="number" v-model="initialValue">
+        <input value="Create Tree" type="submit" @click="createTree">
+        <h4>or</h4>
+        <input value="Generate a Default Tree" type="submit" @click="createDefaultTree">
+    </div>
+    <div v-else>
+        <h3>Add Point: </h3>
+        <input type="number" v-model="currentValue">
+        <input type="submit" @click="insertInTree">
+        <br/>
+        <h3>Find</h3>
+        <input type="number" v-model="findValue">
+        <input type="submit" value="search" @click="findType1(tree)">
+        <input type="submit" value="deep" @click="findInBinaryTreeByDeep">
+        <div id="tree" style="width: 100%; text-align: center;">
+            <h3>Tree</h3>
+            {{tree}}
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            haveTree: false,
+            count: 0,
+            path: [],
+            initialValue: undefined,
+            currentValue: undefined,
+            findValue: undefined,
+            tree: {
+                value: null,
+                left: null,
+                right: null
+            }
+        },
+        methods: {
+            createDefaultTree() {
+                this.tree.value = 10;
+                this.tree.left = null;
+                this.tree.right = null;
+
+                this.insert(this.tree, 5);
+                this.insert(this.tree, 15);
+                this.insert(this.tree, 2);
+                this.insert(this.tree, 7);
+                this.insert(this.tree, 12);
+                this.insert(this.tree, 18);
+                this.insert(this.tree, 1);
+                this.insert(this.tree, 4);
+                this.insert(this.tree, 6);
+                this.insert(this.tree, 9);
+                this.insert(this.tree, 11);
+                this.insert(this.tree, 14);
+                this.insert(this.tree, 17);
+                this.insert(this.tree, 20);
+
+                this.haveTree = true;
+            },
+            createTree() {
+                if (!this.initialValue)
+                    return;
+
+                this.tree = {
+                    value: Number(this.initialValue),
+                    left: null,
+                    right: null,
+                }
+
+                this.haveTree = true;
+            },
+            insertInTree() {
+                if (!this.currentValue)
+                    return;
+
+                this.tree = this.insert(this.tree, Number(this.currentValue));
+            },
+            insert(point, value = 0) {
+                if (value === point.value)
+                    return point;
+
+                const right = value > point.value;
+
+                if (right) {
+                    if (point.right) {
+                        this.insert(point.right, value);
+                    } else {
+                        point.right = {value: value, left: null, right: null};
+                    }
+                } else {
+                    if (point.left) {
+                        this.insert(point.left, value);
+                    } else {
+                        point.left = {value: value, left: null, right: null};
+                    }
+                }
+                return point;
+            },
+            // Arvore de busca
+            findType1(point) {
+                this.count++;
+                this.path.push(point.value);
+
+                const findValue = Number(this.findValue);
+
+                if (point.value === findValue) {
+                    alert('Path: ' + this.path.toString() + " | Count: " + this.count);
+
+                    this.path = [];
+                    this.count = 0;
+
+                    return;
+                }
+
+                const right = findValue > point.value;
+
+                if (right) {
+                    if (!!point.right) {
+                        this.findType1(point.right);
+                    } else {
+                        alert('Value not found. \nPath: ' + this.path.toString() + " | Count: " + this.count);
+                        this.path = [];
+                        this.count = 0;
+                    }
+                } else { // left
+                    if (!!point.left) {
+                        this.findType1(point.left)
+                    } else {
+                        alert('Value not found. \nPath: ' + this.path.toString() + " | Count: " + this.count);
+                        this.path = [];
+                        this.count = 0;
+                    }
+                }
+            },
+            findInBinaryTreeByDeep() {
+                this.count = 0;
+                this.path = [];
+
+                const result = this.verifyPointByDeep(this.tree, Number(this.findValue));
+                const message = !!result ? `Path: ${this.path.toString()} | Count: ${this.count}` : `Value not found. Path: ${this.path.toString()} | Count: ${this.count}`;
+                alert(message);
+
+                this.path = [];
+                this.count = 0;
+            },
+            verifyPointByDeep(point, value) {
+                if (!point)
+                    return;
+
+                this.count++;
+                this.path.push(point.value);
+
+                if (point.value === value)
+                    return "Value '" + value + "' found. count is [" + this.count + "]";
+
+                const left = this.verifyPointByDeep(point.left, value)
+                if (!left) {
+                    const right = this.verifyPointByDeep(point.right, value);
+                    if (!right)
+                        return;
+                }
+
+                return "Value '" + value + "' found. count is [" + this.count + "].";
+            },
+        }
+    })
+</script>
+</html>
